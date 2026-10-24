@@ -42,7 +42,7 @@ Every text size comes from one scale, defined as theme tokens at the top of [`ap
 | `text-button` | 0.875rem, 0.1em tracking | Buttons (uppercase, 14px × 28px padding) |
 | `text-stat` | clamp(2rem, 4vw, 3rem) | Odometers, map counters |
 | `text-marquee` | clamp(2rem, 5vw, 4rem) | Marquee, outlined step numbers |
-| `text-wordmark` | clamp(4rem, 14vw, 10rem) | Footer wordmark, preloader counter |
+| `text-wordmark` | clamp(4rem, 14vw, 10rem) | Footer wordmark, 404 number |
 
 Headings are weight 600, line-height 1.1 and −0.01em tracking. Paragraphs are capped at `max-w-prose`, and sections use `py-14 md:py-20`.
 
@@ -52,15 +52,14 @@ Headings are weight 600, line-height 1.1 and −0.01em tracking. Paragraphs are 
 | --- | --- |
 | Plugin registration, shared media queries | [`lib/gsap.ts`](lib/gsap.ts) |
 | Lenis + ScrollTrigger sync, scroll progress bar, grid fade-in | [`components/SmoothScroll.tsx`](components/SmoothScroll.tsx) |
-| "Container doors" preloader | [`components/Preloader.tsx`](components/Preloader.tsx) and the boot script in [`app/layout.tsx`](app/layout.tsx) |
 | Page transitions | [`components/PageTransition.tsx`](components/PageTransition.tsx) and [`app/template.tsx`](app/template.tsx) |
 | Custom cursor (`data-cursor="view"` / `"drag"` on any element) | [`components/Cursor.tsx`](components/Cursor.tsx) |
 | Section titles (accent line, scrambled eyebrow, masked lines) | [`components/SplitReveal.tsx`](components/SplitReveal.tsx) |
 
 Rules every component follows:
 
-- **Desktop (≥1024px)** gets the full experience. **Mobile** gets simplified reveals: no pinning, custom cursor, mouse parallax or preloader.
-- **`prefers-reduced-motion`** turns off the preloader, Lenis, pinning, parallax, scrubbing and looping motion, and keeps simple fades.
+- **Desktop (≥1024px)** gets the full experience. **Mobile** gets simplified reveals: no pinning, custom cursor or mouse parallax.
+- **`prefers-reduced-motion`** turns off Lenis, pinning, parallax, scrubbing and looping motion, and keeps simple fades.
 - **Continuous motion runs as CSS animations on the compositor** (hero zoom, marquee drift, subtitle rotation, film grain). JavaScript only adjusts them during scroll, for example the marquee's playback rate and skew.
 - **Animation setup stays out of the hydration task.** Below-the-fold components set up when they come within about half a screen (`lib/useNear.ts`); the rest set up in idle time after hydration (`lib/useIdle.ts`).
 - **Elements that animate in on load** carry `data-pre` (or `data-pre-desktop`). They are hidden by CSS until their component takes over, and shown after 4s if JavaScript fails. Without JavaScript, everything is visible.
@@ -83,7 +82,7 @@ LCP (about 4s) is the limiting metric locally. After deploying, check the live U
 ```
 app/            layout (boot script, providers), template (transition hook), pages:
                 /, /services, /projects, /contact, 404, sitemap, robots, favicon
-components/     Preloader, SmoothScroll, PageTransition, Cursor, Header, MobileMenu, Hero,
+components/     SmoothScroll, PageTransition, Cursor, Header, MobileMenu, Hero,
                 SplitReveal, Reveal, ImageReveal, VelocityMarquee, WordHighlight, Odometer,
                 HorizontalServices, RoutesMap, StackingSteps, ProjectHoverList, ProjectsGrid,
                 TiltCard, Lightbox, MagneticButton, QuoteForm, Footer, FooterMotion,

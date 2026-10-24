@@ -5,7 +5,6 @@ import { Footer } from "@/components/Footer";
 import { Header } from "@/components/Header";
 import { MotionProvider } from "@/components/MotionProvider";
 import { PageTransition } from "@/components/PageTransition";
-import { Preloader } from "@/components/Preloader";
 import { SmoothScroll } from "@/components/SmoothScroll";
 import { WhatsAppButton } from "@/components/WhatsAppButton";
 import { images, nav, site } from "@/lib/data";
@@ -64,12 +63,8 @@ const jsonLd = {
   },
 };
 
-/*
- * Runs before first paint:
- *  - html.js lets CSS hide elements that animate in on load (no flash of final state).
- *  - data-intro decides the preloader: first desktop visit per session, never with reduced motion.
- */
-const bootScript = `(function(){var d=document.documentElement;d.classList.add('js');var on=false;try{on=!matchMedia('(prefers-reduced-motion: reduce)').matches&&matchMedia('(min-width: 1024px)').matches&&!sessionStorage.getItem('jnros-intro');if(on)sessionStorage.setItem('jnros-intro','1')}catch(e){}d.setAttribute('data-intro',on?'on':'off')})();`;
+// Runs before first paint: html.js lets CSS hide elements that animate in on load (no flash of final state).
+const bootScript = `document.documentElement.classList.add('js');`;
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   const logo = getLogo();
@@ -100,7 +95,6 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <MotionProvider>
           <SmoothScroll>
             <PageTransition>
-              <Preloader />
               <Cursor />
               <Header logo={logo} nav={nav} />
               <main id="main">{children}</main>

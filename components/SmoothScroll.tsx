@@ -48,7 +48,6 @@ export function SmoothScroll({ children }: { children: React.ReactNode }) {
     let instance: Lenis | null = null;
     let cancelled = false;
     const raf = (time: number) => instance?.raf(time * 1000);
-    const onIntroDone = () => instance?.start();
 
     import("lenis").then(({ default: LenisClass }) => {
       if (cancelled) return;
@@ -56,15 +55,11 @@ export function SmoothScroll({ children }: { children: React.ReactNode }) {
       instance.on("scroll", ScrollTrigger.update);
       gsap.ticker.add(raf);
       gsap.ticker.lagSmoothing(0);
-      // Hold scrolling while the preloader doors are closed.
-      if (document.documentElement.dataset.intro === "on") instance.stop();
-      window.addEventListener("jnros:intro-done", onIntroDone);
       setLenis(instance);
     });
 
     return () => {
       cancelled = true;
-      window.removeEventListener("jnros:intro-done", onIntroDone);
       gsap.ticker.remove(raf);
       instance?.destroy();
       setLenis(null);

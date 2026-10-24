@@ -130,18 +130,6 @@ html.lenis body {
   }
 }
 
-/* Preloader only renders for the first desktop visit of a session (decided before paint). */
-html:not([data-intro="on"]) [data-preloader] {
-  display: none;
-}
-html[data-intro="on"] {
-  overflow: hidden;
-}
-/* Hero image starts as a container-shaped window behind the preloader doors. */
-html[data-intro="on"] [data-hero-frame] {
-  clip-path: inset(36% 30% 36% 30% round 10px);
-}
-
 @layer components {
   /* Consistent treatment for mixed-quality photos: navy tint + slight contrast boost. */
   .photo {

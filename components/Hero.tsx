@@ -2,7 +2,6 @@
 
 import Image from "next/image";
 import { useRef } from "react";
-import { INTRO_REVEAL } from "@/components/Preloader";
 import { ButtonLink, Container } from "@/components/ui";
 import type { SiteImage } from "@/lib/data";
 import { gsap, MQ, SplitText, useGSAP } from "@/lib/gsap";
@@ -38,20 +37,14 @@ export function Hero({ title, subtitles, image, coordinates }: Props) {
       const mm = gsap.matchMedia();
 
       mm.add(MQ.reduce, () => {
-        gsap.set(frame, { clipPath: "none" });
         gsap.set([heading, ...after, coords], { visibility: "visible" });
         gsap.from([heading, ...after], { autoAlpha: 0, duration: 0.6, ease: "none" });
       });
 
       // Mobile: text is already painted (it is the LCP element); the slow zoom is pure CSS.
-      mm.add(MQ.mobile, () => {
-        gsap.set(frame, { clipPath: "none" });
-      });
 
       mm.add(MQ.desktop, () => {
-        const withIntro = document.documentElement.dataset.intro === "on";
-
-        // Characters slide up from behind a per-line mask.
+        // Characters slide up from behind a per-line mask as soon as the page loads.
         const split = SplitText.create(heading, { type: "lines,chars", mask: "lines" });
         gsap.set(heading, { visibility: "visible" });
         gsap.set(split.chars, { yPercent: 115 });
@@ -59,35 +52,13 @@ export function Hero({ title, subtitles, image, coordinates }: Props) {
         gsap.set(coords, { visibility: "visible" });
         coords.textContent = "";
 
-        const intro = gsap.timeline({ paused: true });
-        if (withIntro) {
-          // A container-shaped window (20ft box, 2.35:1) that opens to full screen.
-          const w = window.innerWidth;
-          const h = window.innerHeight;
-          const boxW = Math.min(w * 0.4, 640);
-          const boxH = boxW / 2.35;
-          const ix = (w - boxW) / 2;
-          const iy = (h - boxH) / 2;
-          intro.fromTo(
-            frame,
-            { clipPath: `inset(${iy}px ${ix}px ${iy}px ${ix}px round 10px)` },
-            { clipPath: "inset(0px 0px 0px 0px round 0px)", duration: 1.4, ease: "expo.inOut" },
-          );
-          intro.set(frame, { clipPath: "none" });
-          intro.to(split.chars, { yPercent: 0, duration: 1.1, stagger: 0.02, ease: "expo.out" }, 0.95);
-        } else {
-          gsap.set(frame, { clipPath: "none" });
-          intro.to(split.chars, { yPercent: 0, duration: 1.1, stagger: 0.02, ease: "expo.out" }, 0.15);
-        }
-        intro
+        gsap
+          .timeline({ delay: 0.15 })
+          .to(split.chars, { yPercent: 0, duration: 1.1, stagger: 0.02, ease: "expo.out" })
           .to(after, { autoAlpha: 1, y: 0, duration: 1, stagger: 0.12, ease: "expo.out" }, "-=0.7")
           .add(typeInto(coords, coordinates), "-=0.6")
           // Hand the heading back to normal text flow so it reflows on resize.
           .call(() => split.revert());
-
-        const play = () => intro.play();
-        if (withIntro && !window.__jnrosRevealed) window.addEventListener(INTRO_REVEAL, play, { once: true });
-        else play();
 
         // Scrubbed "pull away": the image shrinks into a rounded card while the copy rises faster.
         gsap
@@ -106,10 +77,7 @@ export function Hero({ title, subtitles, image, coordinates }: Props) {
         };
         window.addEventListener("pointermove", onMove, { passive: true });
 
-        return () => {
-          window.removeEventListener(INTRO_REVEAL, play);
-          window.removeEventListener("pointermove", onMove);
-        };
+        return () => window.removeEventListener("pointermove", onMove);
       });
     },
     { scope: root },
