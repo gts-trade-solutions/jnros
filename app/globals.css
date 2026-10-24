@@ -1,0 +1,341 @@
+@import "tailwindcss";
+
+@theme {
+  --color-navy: #0a1a2f;
+  --color-navy-800: #10243c;
+  --color-navy-deep: #06111f;
+  --color-steel: #8a98a8;
+  /* Steel darkened for body text on light backgrounds (5.8:1 on off-white). */
+  --color-steel-dark: #536274;
+  --color-offwhite: #f4f6f8;
+  --color-orange: #ff6b1a;
+  --color-orange-light: #ff8a4c;
+  /* WhatsApp green, darkened so the white glyph keeps 3:1 contrast. */
+  --color-whatsapp: #1a9e4e;
+
+  --shadow-card: 0 24px 48px -24px rgb(10 26 47 / 0.45);
+  --shadow-card-dark: 0 28px 56px -24px rgb(0 0 0 / 0.75);
+
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /*
+   * Type scale: the only text sizes used on the site. Change sizes here, not in components.
+   * Fluid steps are clamp(phone, fluid, max).
+   */
+  --text-hero: clamp(2rem, 4.5vw, 3.75rem); /* hero + sub-page H1 */
+  --text-hero--line-height: 1.1;
+  --text-hero--letter-spacing: -0.01em;
+  --text-hero--font-weight: 600;
+  --text-h2: clamp(1.75rem, 3vw, 2.5rem); /* section headings */
+  --text-h2--line-height: 1.1;
+  --text-h2--letter-spacing: -0.01em;
+  --text-h2--font-weight: 600;
+  --text-h3: clamp(1.125rem, 1.5vw, 1.375rem); /* card and sub headings */
+  --text-h3--line-height: 1.1;
+  --text-h3--letter-spacing: -0.01em;
+  --text-h3--font-weight: 600;
+  --text-eyebrow: 0.75rem; /* use with uppercase */
+  --text-eyebrow--line-height: 1.4;
+  --text-eyebrow--letter-spacing: 0.15em;
+  --text-base: 1rem; /* body */
+  --text-base--line-height: 1.7;
+  --text-sm: 0.875rem; /* small / meta */
+  --text-sm--line-height: 1.6;
+  --text-nav: 0.875rem; /* use with uppercase */
+  --text-nav--line-height: 1.4;
+  --text-nav--letter-spacing: 0.08em;
+  --text-button: 0.875rem; /* use with uppercase */
+  --text-button--line-height: 1.43;
+  --text-button--letter-spacing: 0.1em;
+  --text-stat: clamp(2rem, 4vw, 3rem);
+  --text-stat--line-height: 1;
+  --text-marquee: clamp(2rem, 5vw, 4rem);
+  --text-marquee--line-height: 1;
+  --text-wordmark: clamp(4rem, 14vw, 10rem);
+  --text-wordmark--line-height: 0.8;
+  --text-wordmark--font-weight: 600;
+
+  --leading-relaxed: 1.7;
+}
+
+@theme inline {
+  --font-display: var(--font-sora), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-condensed: var(--font-barlow-condensed), "Arial Narrow", ui-sans-serif, sans-serif;
+}
+
+/* ---------------------------------------------------------------------- */
+/* Lenis (its CSS file is not exported by the package)                     */
+/* ---------------------------------------------------------------------- */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+.lenis:not(.lenis-autoToggle).lenis-stopped {
+  overflow: clip;
+}
+.lenis [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+@layer base {
+  body {
+    background-color: var(--color-offwhite);
+    color: var(--color-navy);
+    font-size: var(--text-base);
+    line-height: var(--text-base--line-height);
+  }
+
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+  }
+
+  ::selection {
+    background-color: var(--color-orange);
+    color: var(--color-navy);
+  }
+
+  /* currentColor keeps the ring visible on both light (navy) and dark (white) sections. */
+  :focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 3px;
+  }
+}
+
+/* ---------------------------------------------------------------------- */
+/* Pre-hydration states                                                     */
+/* ---------------------------------------------------------------------- */
+
+/*
+ * html.js is set by an inline script before first paint. Elements that animate in on load
+ * stay hidden until their component takes over, so there is no flash of final state.
+ * If JavaScript fails after that, the fallback animation shows them after 4s.
+ */
+.js [data-pre] {
+  visibility: hidden;
+  animation: pre-fallback 0s 4s forwards;
+}
+@keyframes pre-fallback {
+  to {
+    visibility: visible;
+  }
+}
+/* Above-the-fold text animates on desktop only; on mobile it paints immediately (it is the LCP element). */
+@media (min-width: 1024px) {
+  .js [data-pre-desktop] {
+    visibility: hidden;
+    animation: pre-fallback 0s 4s forwards;
+  }
+}
+
+/* Preloader only renders for the first desktop visit of a session (decided before paint). */
+html:not([data-intro="on"]) [data-preloader] {
+  display: none;
+}
+html[data-intro="on"] {
+  overflow: hidden;
+}
+/* Hero image starts as a container-shaped window behind the preloader doors. */
+html[data-intro="on"] [data-hero-frame] {
+  clip-path: inset(36% 30% 36% 30% round 10px);
+}
+
+@layer components {
+  /* Consistent treatment for mixed-quality photos: navy tint + slight contrast boost. */
+  .photo {
+    position: relative;
+    overflow: hidden;
+  }
+  .photo img {
+    filter: contrast(1.08) saturate(0.92);
+  }
+  .photo::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: rgb(10 26 47 / 0.35);
+    pointer-events: none;
+  }
+
+  /* Engineering-drawing grid for dark sections. */
+  .blueprint {
+    background-image:
+      linear-gradient(rgb(138 152 168 / 0.1) 1px, transparent 1px),
+      linear-gradient(90deg, rgb(138 152 168 / 0.1) 1px, transparent 1px);
+    background-size: 64px 64px;
+    mask-image: linear-gradient(180deg, transparent, #000 20%, #000 80%, transparent);
+  }
+
+  .hero-shade {
+    background:
+      linear-gradient(90deg, rgb(10 26 47 / 0.94) 0%, rgb(10 26 47 / 0.72) 50%, rgb(10 26 47 / 0.3) 100%),
+      linear-gradient(0deg, rgb(10 26 47 / 0.92) 0%, rgb(10 26 47 / 0) 50%);
+  }
+
+  /* Explicit stroke colours: with color: transparent, currentColor would be transparent too. */
+  .text-outline {
+    color: transparent;
+    -webkit-text-stroke: 1.5px var(--color-navy);
+  }
+  .text-outline-steel {
+    color: transparent;
+    -webkit-text-stroke: 1.5px var(--color-steel);
+  }
+
+  /* Animated film grain for dark sections. Moves with transform only, so it stays on the compositor. */
+  .grain {
+    position: relative;
+    isolation: isolate;
+    overflow: clip;
+  }
+  .grain::before {
+    content: "";
+    position: absolute;
+    inset: -50%;
+    z-index: 0;
+    pointer-events: none;
+    opacity: 0.07;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    animation: grain 0.9s steps(5) infinite;
+  }
+  @keyframes grain {
+    0% { transform: translate(0, 0); }
+    20% { transform: translate(-6%, 4%); }
+    40% { transform: translate(5%, -6%); }
+    60% { transform: translate(-3%, 7%); }
+    80% { transform: translate(7%, 2%); }
+    100% { transform: translate(0, 0); }
+  }
+
+  /* "Learn more": orange rule that grows to full width on hover. */
+  .link-underline {
+    position: relative;
+    display: inline-flex;
+    padding-bottom: 6px;
+    font-weight: 600;
+  }
+  .link-underline::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    height: 2px;
+    width: 100%;
+    background-color: var(--color-orange);
+    transform: scaleX(0.3);
+    transform-origin: left;
+    transition: transform 0.45s var(--ease-out-expo);
+  }
+  .group:hover .link-underline::after,
+  .group:focus-visible .link-underline::after,
+  .link-underline:hover::after,
+  .link-underline:focus-visible::after {
+    transform: scaleX(1);
+  }
+
+  /* Terminal caret for the coordinates ticker. */
+  .caret::after {
+    content: "";
+    display: inline-block;
+    width: 0.55em;
+    height: 1em;
+    margin-left: 0.2em;
+    vertical-align: -0.15em;
+    background: var(--color-orange);
+    animation: caret 1s steps(1) infinite;
+  }
+  @keyframes caret {
+    50% { opacity: 0; }
+  }
+
+  .pulse-ring {
+    animation: pulse-ring 2s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+  }
+  @keyframes pulse-ring {
+    from { transform: scale(1); opacity: 0.55; }
+    to { transform: scale(1.8); opacity: 0; }
+  }
+
+  /* Origin pin on the routes map. SVG animations run on the main thread, so only while on screen. */
+  .map-pulse {
+    transform-box: fill-box;
+    transform-origin: center;
+    opacity: 0;
+  }
+  .map-live .map-pulse {
+    animation: map-pulse 2.2s ease-out infinite;
+  }
+
+  /*
+   * Continuous motion runs as CSS animations so it stays on the compositor thread:
+   * a per-frame JS loop would keep a phone's main thread busy indefinitely.
+   */
+  .hero-zoom {
+    animation: hero-zoom 14s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+  }
+  @keyframes hero-zoom {
+    from { transform: scale(1.15); }
+    to { transform: scale(1); }
+  }
+
+  .marquee-track {
+    animation: marquee 60s linear infinite;
+  }
+
+  /* Hero subtitle: three lines take turns every 3s with a fade/slide, no JavaScript. */
+  .subtitle-cycle > * {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    animation: subtitle-cycle 9s infinite;
+  }
+  .subtitle-cycle > :nth-child(2) {
+    animation-delay: 3s;
+  }
+  .subtitle-cycle > :nth-child(3) {
+    animation-delay: 6s;
+  }
+  @keyframes subtitle-cycle {
+    0% { opacity: 0; transform: translateY(18px); }
+    5%, 30% { opacity: 1; transform: translateY(0); }
+    35%, 100% { opacity: 0; transform: translateY(-18px); }
+  }
+  @keyframes marquee {
+    to { transform: translateX(-50%); }
+  }
+  @keyframes map-pulse {
+    from { transform: scale(1); opacity: 0.8; }
+    to { transform: scale(4); opacity: 0; }
+  }
+}
+
+/* ---------------------------------------------------------------------- */
+/* Custom cursor (desktop, fine pointer only; class added by <Cursor>)     */
+/* ---------------------------------------------------------------------- */
+html.has-cursor,
+html.has-cursor * {
+  cursor: none !important;
+}
+html.has-cursor :is(input, textarea, select, iframe) {
+  cursor: auto !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .grain::before,
+  .caret::after,
+  .pulse-ring,
+  .map-live .map-pulse,
+  .hero-zoom,
+  .marquee-track,
+  .subtitle-cycle > * {
+    animation: none;
+  }
+  .subtitle-cycle > :first-child {
+    opacity: 1;
+  }
+  .link-underline::after {
+    transition: none;
+  }
+}
